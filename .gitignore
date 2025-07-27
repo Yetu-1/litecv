@@ -1,0 +1,27 @@
+# --- Build and CMake artifacts ---
+/build/
+/CMakeFiles/
+/CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# --- Executables and libraries ---
+*.exe
+*.out
+*.o
+*.obj
+*.a
+*.so
+*.dylib
+
+# --- IDE-specific files ---
+.vscode/
+.idea/
+*.swp
+
+# --- OS-specific clutter ---
+.DS_Store
+Thumbs.db
+
+# --- Logs or temporary files ---
+*.log
