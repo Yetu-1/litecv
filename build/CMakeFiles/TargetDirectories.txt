@@ -1,0 +1,3 @@
+/Users/davidsalihu/Desktop/desktop/Projects/LiteCV/build/CMakeFiles/litecv.dir
+/Users/davidsalihu/Desktop/desktop/Projects/LiteCV/build/CMakeFiles/edit_cache.dir
+/Users/davidsalihu/Desktop/desktop/Projects/LiteCV/build/CMakeFiles/rebuild_cache.dir
