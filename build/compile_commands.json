@@ -1,8 +1,0 @@
-[
-{
-  "directory": "/Users/davidsalihu/Desktop/desktop/Projects/LiteCV/build",
-  "command": "/usr/bin/clang++  -I/Users/davidsalihu/Desktop/desktop/Projects/LiteCV/include -g -std=gnu++17 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk -o CMakeFiles/litecv.dir/src/main.cpp.o -c /Users/davidsalihu/Desktop/desktop/Projects/LiteCV/src/main.cpp",
-  "file": "/Users/davidsalihu/Desktop/desktop/Projects/LiteCV/src/main.cpp",
-  "output": "CMakeFiles/litecv.dir/src/main.cpp.o"
-}
-]
