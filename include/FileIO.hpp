@@ -20,7 +20,7 @@ public:
 
 private:
     Image loadPPM(std::ifstream &file);
-    int savePPM(Image &image);
+    int savePPM(const Image &image);
 };
 
 #endif // FILEIO_HPP

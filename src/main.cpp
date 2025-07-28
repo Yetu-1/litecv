@@ -6,7 +6,7 @@ int main()
     std::cout << "Mini Image Processing Library!" << std::endl;
     FileIO file_io;
 
-    file_io.loadImage("../assets/tree_1.ppm");
+    file_io.loadImage("../assets/car.ppm");
 
     return 0;
 }

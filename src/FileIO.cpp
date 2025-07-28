@@ -7,28 +7,44 @@ int FileIO::loadImage(std::string image_src)
     if (!file.is_open())
     {
         std::cerr << "Failed to open image file!" << std::endl;
-        return 1;
+        return -1;
     }
 
+    // read magic number to determine file format
     std::string magic_num;
     file >> magic_num;
 
     if (magic_num == "P6" || magic_num == "P3")
     {
         Image image = loadPPM(file);
-        std::cout << "Buffer size: " << image.buffer.size() << std::endl;
         savePPM(image);
     }
+
+    file.close();
 
     return 0;
 }
 
 Image FileIO::loadPPM(std::ifstream &file)
 {
-    std::cout << "Loading Image File!" << std::endl;
-
+    std::cerr << "Loading Image File!" << std::endl;
+    std::string line;
     int width, height, maxval;
-    file >> width >> height >> maxval;
+
+    file.get(); // read newline char
+
+    std::getline(file, line);
+    // Parse line if it's not a comment
+    if (line[0] == '#')
+    {
+        file >> width >> height;
+    }
+    else
+    {
+        width = std::stoi(line.substr(0, 3));
+        height = std::stoi(line.substr(4, 3));
+    }
+    file >> maxval;
     file.get();
     int total_bytes = width * height * PPM_CHANNEL_SIZE;
 
@@ -39,16 +55,25 @@ Image FileIO::loadPPM(std::ifstream &file)
     return image;
 }
 
-int FileIO::savePPM(Image &image)
+int FileIO::savePPM(const Image &image)
 {
     std::cout << "Saving Image File!" << std::endl;
     std::ofstream image_file("../assets/sample_out.ppm");
+
+    if (!image_file.is_open())
+    {
+        std::cout << "Failed to open image file!" << std::endl;
+        return -1;
+    }
     int total_bytes = image.width * image.height * PPM_CHANNEL_SIZE;
+    // Save image as binary PPM (P6): header + raw pixel data
     image_file << "P6" << "\n";
     image_file << image.width << " " << image.height << "\n";
     image_file << image.max_val << "\n";
-    image_file.write(reinterpret_cast<char *>(image.buffer.data()), total_bytes);
+    image_file.write(reinterpret_cast<const char *>(image.buffer.data()), total_bytes);
     image_file.close();
 
-    return 0;
+    std::cout << "Image File Saved!" << std::endl;
+
+    return image_file ? 0 : -1;
 }
