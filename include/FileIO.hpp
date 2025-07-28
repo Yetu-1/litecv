@@ -9,8 +9,8 @@
 class FileIO
 {
 public:
-    int loadImage(std::string image_src);
-
+    Image loadImage(std::string image_src);
+    int saveImage(const Image &image, std::string filename);
     FileIO()
     {
     }
@@ -20,7 +20,6 @@ public:
 
 private:
     Image loadPPM(std::ifstream &file);
-    int savePPM(const Image &image);
 };
 
 #endif // FILEIO_HPP

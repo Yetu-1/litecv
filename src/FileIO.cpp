@@ -1,9 +1,9 @@
 #include "../include/FileIO.hpp"
 
-int FileIO::loadImage(std::string image_src)
+Image FileIO::loadImage(std::string image_src)
 {
+    Image image;
     std::ifstream file(image_src, std::ios::binary); // open file in binary mode
-
     if (!file.is_open())
     {
         std::cerr << "Failed to open image file!" << std::endl;
@@ -16,18 +16,18 @@ int FileIO::loadImage(std::string image_src)
 
     if (magic_num == "P6" || magic_num == "P3")
     {
-        Image image = loadPPM(file);
-        savePPM(image);
+        image = loadPPM(file);
+        saveImage(image, "color_img");
     }
 
     file.close();
 
-    return 0;
+    return image;
 }
 
 Image FileIO::loadPPM(std::ifstream &file)
 {
-    std::cerr << "Loading Image File!" << std::endl;
+    std::cout << "Loading Image File!" << std::endl;
     std::string line;
     int width, height, maxval;
 
@@ -50,15 +50,15 @@ Image FileIO::loadPPM(std::ifstream &file)
 
     Image image(width, height, PPM_CHANNEL_SIZE, maxval);
 
-    file.read(reinterpret_cast<char *>(image.buffer.data()), total_bytes);
+    file.read(reinterpret_cast<char *>(image.pixels.data()), total_bytes);
 
     return image;
 }
 
-int FileIO::savePPM(const Image &image)
+int FileIO::saveImage(const Image &image, std::string filename)
 {
     std::cout << "Saving Image File!" << std::endl;
-    std::ofstream image_file("../assets/sample_out.ppm");
+    std::ofstream image_file("../assets/" + filename + ".ppm");
 
     if (!image_file.is_open())
     {
@@ -70,7 +70,7 @@ int FileIO::savePPM(const Image &image)
     image_file << "P6" << "\n";
     image_file << image.width << " " << image.height << "\n";
     image_file << image.max_val << "\n";
-    image_file.write(reinterpret_cast<const char *>(image.buffer.data()), total_bytes);
+    image_file.write(reinterpret_cast<const char *>(image.pixels.data()), total_bytes);
     image_file.close();
 
     std::cout << "Image File Saved!" << std::endl;

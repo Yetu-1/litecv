@@ -10,10 +10,10 @@ public:
     int height;
     int channels;
     int max_val;
-    std::vector<unsigned char> buffer;
+    std::vector<unsigned char> pixels;
 
-    Image(int w, int h, int c, int mv)
-        : width(w), height(h), channels(c), buffer(w * h * c), max_val(mv)
+    Image(int w = 0, int h = 0, int c = 0, int mv = 0)
+        : width(w), height(h), channels(c), pixels(w * h * c), max_val(mv)
     {
     }
     ~Image()
