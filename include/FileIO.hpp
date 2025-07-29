@@ -3,14 +3,13 @@
 
 #include <fstream>
 #include <iostream>
-#include <string>
 #include "Image.hpp"
 
 class FileIO
 {
 public:
-    Image loadImage(std::string image_src);
-    int saveImage(const Image &image, std::string filename);
+    Image loadImage(const char *image_src);
+    int saveImage(const Image &image, const char *filename);
     FileIO()
     {
     }

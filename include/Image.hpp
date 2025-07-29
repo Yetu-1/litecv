@@ -8,12 +8,12 @@ class Image
 public:
     int width;
     int height;
-    int channels;
+    int no_of_chnls;
     int max_val;
     std::vector<unsigned char> pixels;
 
     Image(int w = 0, int h = 0, int c = 0, int mv = 0)
-        : width(w), height(h), channels(c), pixels(w * h * c), max_val(mv)
+        : width(w), height(h), no_of_chnls(c), pixels(w * h * c), max_val(mv)
     {
     }
     ~Image()
