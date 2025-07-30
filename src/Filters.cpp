@@ -2,11 +2,11 @@
 
 #include "../include/Filters.hpp"
 #include "../include/stb_image_resize2.h"
-#define GRAY_SCALE_CHNL_SIZE 1
+
 // Convert image int rgb to grayscale using luminosity method
 Image convertToGrayscale(Image &image)
 {
-    int totalBytes = image.width * image.height;
+    int output_img_size = image.width * image.height;
     int no_of_channels = 1;
     if (image.no_of_chnls <= 2) // Already in grayscale
     {
@@ -14,7 +14,7 @@ Image convertToGrayscale(Image &image)
     }
     else if (image.no_of_chnls == 4)
     {
-        totalBytes *= 2; // Expand totalBytes to include alpha channel (2 channels total)
+        output_img_size *= 2; // Expand output image size (in bytes) to include alpha channel (2 channels total)
         ++no_of_channels;
     }
     std::vector<unsigned char> grayscale_pixels;
@@ -33,7 +33,7 @@ Image convertToGrayscale(Image &image)
             grayscale_pixels.push_back(image.pixels[++i]);
         }
     }
-    if (!(totalBytes == grayscale_pixels.size()))
+    if (!(output_img_size == grayscale_pixels.size()))
     {
         std::cout << "Error converting Image!" << std::endl;
         return Image();
