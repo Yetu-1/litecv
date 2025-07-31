@@ -25,35 +25,35 @@ Image FileIO::loadImage(const char *image_src)
     return image;
 }
 
-Image FileIO::loadPPM(std::ifstream &file)
-{
-    std::cout << "Loading Image File!" << std::endl;
-    std::string line;
-    int width, height, maxval;
+// Image FileIO::loadPPM(std::ifstream &file)
+// {
+//     std::cout << "Loading Image File!" << std::endl;
+//     std::string line;
+//     int width, height, maxval;
 
-    file.get(); // read newline char
+//     file.get(); // read newline char
 
-    std::getline(file, line);
-    // Parse line if it's not a comment
-    if (line[0] == '#')
-    {
-        file >> width >> height;
-    }
-    else
-    {
-        width = std::stoi(line.substr(0, 3));
-        height = std::stoi(line.substr(4, 3));
-    }
-    file >> maxval;
-    file.get();
-    int total_bytes = width * height * PPM_CHANNEL_SIZE;
+//     std::getline(file, line);
+//     // Parse line if it's not a comment
+//     if (line[0] == '#')
+//     {
+//         file >> width >> height;
+//     }
+//     else
+//     {
+//         width = std::stoi(line.substr(0, 3));
+//         height = std::stoi(line.substr(4, 3));
+//     }
+//     file >> maxval;
+//     file.get();
+//     int total_bytes = width * height * PPM_CHANNEL_SIZE;
 
-    Image image(width, height, PPM_CHANNEL_SIZE, maxval);
+//     Image image(width, height, PPM_CHANNEL_SIZE, maxval);
 
-    file.read(reinterpret_cast<char *>(image.pixels.data()), total_bytes);
+//     file.read(reinterpret_cast<char *>(image.pixels.data()), total_bytes);
 
-    return image;
-}
+//     return image;
+// }
 
 int FileIO::saveImage(const Image &image, const char *filepath)
 {

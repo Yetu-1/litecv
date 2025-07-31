@@ -2,23 +2,25 @@
 
 #include "../include/Filters.hpp"
 #include "../include/stb_image_resize2.h"
+#include <array>
+#include <math.h>
 
 // Convert image int rgb to grayscale using luminosity method
-Image convertToGrayscale(Image &image)
+int convertToGrayscale(Image &image)
 {
     int output_img_size = image.width * image.height;
     int no_of_channels = 1;
     if (image.no_of_chnls <= 2) // Already in grayscale
     {
-        return image;
+        return 2; // 2 = code for "already in grayscale"
     }
     else if (image.no_of_chnls == 4)
     {
         output_img_size *= 2; // Expand output image size (in bytes) to include alpha channel (2 channels total)
         ++no_of_channels;
     }
+
     std::vector<unsigned char> grayscale_pixels;
-    int counter = 0;
     for (int i = 0; i < image.pixels.size(); i++)
     {
         uint8_t red = image.pixels[i];
@@ -36,12 +38,58 @@ Image convertToGrayscale(Image &image)
     if (!(output_img_size == grayscale_pixels.size()))
     {
         std::cout << "Error converting Image!" << std::endl;
-        return Image();
+        return -1;
     }
 
-    // Create grayscale image object
-    Image grayscale_image(image.width, image.height, no_of_channels, image.max_val);
-    grayscale_image.pixels = grayscale_pixels;
+    image.no_of_chnls = no_of_channels;
+    image.pixels = grayscale_pixels;
 
-    return grayscale_image;
+    return 0;
+}
+
+int applyBoxBlur(Image &image, int r)
+{
+    int width = image.width;
+    int height = image.height;
+
+    std::vector<unsigned char> blurred_img_data;
+    int area = std::pow((2 * r + 1), 2);
+
+    for (int x = r; x < width - r; x++)
+    {
+        for (int y = r; y < height - r; y++)
+        {
+            std::array<float, 3> rgb_sum = {0, 0, 0};
+            for (int i = x - r; i < x + r; i++)
+            {
+                for (int j = y - r; j < y + r; j++)
+                {
+                    int pixel_idx = ((i * width) + j) * image.no_of_chnls; // Get the index of the pixel in the 1D array (pixel of the first element(red))
+
+                    rgb_sum[0] += image.pixels[pixel_idx];
+                    rgb_sum[1] += image.pixels[pixel_idx + 1];
+                    rgb_sum[2] += image.pixels[pixel_idx + 2];
+                }
+            }
+
+            for (auto &val : rgb_sum)
+                val /= area;
+
+            blurred_img_data.insert(blurred_img_data.end(), rgb_sum.begin(), rgb_sum.end());
+        }
+    }
+    // Remove edge pixels from original image size
+    int expected_image_size = image.pixels.size() -
+                              (image.width * image.no_of_chnls * 2 + (image.height * image.no_of_chnls * 2 - 4 * image.no_of_chnls));
+
+    if (blurred_img_data.size() != expected_image_size)
+    {
+        std::cout << "Error Blurring Image" << std::endl;
+        return -1;
+    }
+    // Update width and height to reflect change due to missing edge pixels
+    image.width = width - r * 2;
+    image.height = height - r * 2;
+    image.pixels = blurred_img_data;
+    return 0;
 }
