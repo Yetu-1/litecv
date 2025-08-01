@@ -7,6 +7,6 @@
 
 // Transform Filters
 int convertToGrayscale(Image &image);
-int applyBoxBlur(Image &image, int r);
+Image applyBoxBlur(Image &image, int r);
 
 #endif // FILTERS_HPP

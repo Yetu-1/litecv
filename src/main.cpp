@@ -10,8 +10,8 @@ int main()
     Image image = file_io.loadImage("../assets/image.png");
 
     // int flag = convertToGrayscale(image);
-    int flag = applyBoxBlur(image, 1);
+    Image blurred_image = applyBoxBlur(image, 5);
 
-    file_io.saveImage(image, "../assets/image_out.png");
+    file_io.saveImage(blurred_image, "../assets/image_out.png");
     return 0;
 }

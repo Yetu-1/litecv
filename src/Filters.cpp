@@ -47,22 +47,22 @@ int convertToGrayscale(Image &image)
     return 0;
 }
 
-int applyBoxBlur(Image &image, int r)
+Image applyBoxBlur(Image &image, int r)
 {
     int width = image.width;
     int height = image.height;
+    Image new_image = image;
+    int blurred_pixel_count = 0;
 
-    std::vector<unsigned char> blurred_img_data;
     int area = std::pow((2 * r + 1), 2);
-
-    for (int x = r; x < width - r; x++)
+    for (int y = r; y < height - r; y++)
     {
-        for (int y = r; y < height - r; y++)
+        for (int x = r; x < width - r; x++)
         {
             std::array<float, 3> rgb_sum = {0, 0, 0};
-            for (int i = x - r; i < x + r; i++)
+            for (int i = y - r; i <= y + r; i++) // loop rows
             {
-                for (int j = y - r; j < y + r; j++)
+                for (int j = x - r; j <= x + r; j++) // loop columns
                 {
                     int pixel_idx = ((i * width) + j) * image.no_of_chnls; // Get the index of the pixel in the 1D array (pixel of the first element(red))
 
@@ -74,22 +74,20 @@ int applyBoxBlur(Image &image, int r)
 
             for (auto &val : rgb_sum)
                 val /= area;
-
-            blurred_img_data.insert(blurred_img_data.end(), rgb_sum.begin(), rgb_sum.end());
+            int idx = ((y * width) + x) * image.no_of_chnls; // Get the index of the pixel in the 1D array (pixel of the first element(red))
+            new_image.pixels[idx] = rgb_sum[0];
+            new_image.pixels[idx + 1] = rgb_sum[1];
+            new_image.pixels[idx + 2] = rgb_sum[2];
+            blurred_pixel_count++;
         }
     }
-    // Remove edge pixels from original image size
-    int expected_image_size = image.pixels.size() -
-                              (image.width * image.no_of_chnls * 2 + (image.height * image.no_of_chnls * 2 - 4 * image.no_of_chnls));
-
-    if (blurred_img_data.size() != expected_image_size)
+    int expected_image_size = (width - r * 2) * (height - r * 2);
+    std::cout << "Expected: " << expected_image_size << std::endl;
+    std::cout << "Actual: " << blurred_pixel_count << std::endl;
+    if (blurred_pixel_count != expected_image_size)
     {
         std::cout << "Error Blurring Image" << std::endl;
-        return -1;
+        return image;
     }
-    // Update width and height to reflect change due to missing edge pixels
-    image.width = width - r * 2;
-    image.height = height - r * 2;
-    image.pixels = blurred_img_data;
-    return 0;
+    return new_image;
 }
