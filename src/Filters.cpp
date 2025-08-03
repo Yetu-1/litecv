@@ -5,6 +5,12 @@
 #include <array>
 #include <math.h>
 
+// Returns the 1D array index of a pixel in a row-major 2D image with multiple channels.
+int getLinearIndex(int row, int column, int width, int no_of_channels)
+{
+    return ((row * width) + column) * no_of_channels;
+}
+
 // Convert image int rgb to grayscale using luminosity method
 int convertToGrayscale(Image &image)
 {
@@ -47,47 +53,144 @@ int convertToGrayscale(Image &image)
     return 0;
 }
 
-Image applyBoxBlur(Image &image, int r)
+// Image applyBoxBlur(Image image, int r)
+// {
+//     int width = image.width;
+//     int height = image.height;
+//     Image new_image = image;
+//     int blurred_pixel_count = 0;
+
+//     int area = std::pow((2 * r + 1), 2);
+//     for (int y = r; y < height - r; y++)
+//     {
+//         for (int x = r; x < width - r; x++)
+//         {
+//             std::array<float, 3> rgb_sum = {0, 0, 0};
+//             for (int i = y - r; i <= y + r; i++) // loop rows
+//             {
+//                 for (int j = x - r; j <= x + r; j++) // loop columns
+//                 {
+//                     int pixel_idx = getLinearIndex(i, j, width, image.no_of_chnls); // Get the index of the pixel in the 1D array (pixel of the first element(red))
+
+//                     rgb_sum[0] += image.pixels[pixel_idx];
+//                     rgb_sum[1] += image.pixels[pixel_idx + 1];
+//                     rgb_sum[2] += image.pixels[pixel_idx + 2];
+//                 }
+//             }
+
+//             for (auto &val : rgb_sum)
+//                 val /= area;
+//             int idx = getLinearIndex(y, x, width, image.no_of_chnls); // Get the index of the pixel in the 1D array (pixel of the first element(red))
+//             new_image.pixels[idx] = rgb_sum[0];
+//             new_image.pixels[++idx] = rgb_sum[1];
+//             new_image.pixels[++idx] = rgb_sum[2];
+//             blurred_pixel_count++;
+//         }
+//     }
+
+//     int expected_image_size = (width - r * 2) * (height - r * 2);
+//     if (blurred_pixel_count != expected_image_size)
+//     {
+//         std::cout << "Error Blurring Image" << std::endl;
+//         return image;
+//     }
+//     return new_image;
+// }
+
+Image applyBoxBlur(Image image, int r)
 {
     int width = image.width;
     int height = image.height;
     Image new_image = image;
-    int blurred_pixel_count = 0;
-
     int area = std::pow((2 * r + 1), 2);
-    for (int y = r; y < height - r; y++)
+    std::vector<int> table = computeSummedAreaTable(image);
+    int num_color_channels = getColorChannelCount(image.no_of_chnls);
+    int blurred_pixel_count = 0;
+    for (int y = r + 1; y < height - r - 1; y++)
     {
-        for (int x = r; x < width - r; x++)
+        for (int x = r + 1; x < width - r - 1; x++)
         {
-            std::array<float, 3> rgb_sum = {0, 0, 0};
-            for (int i = y - r; i <= y + r; i++) // loop rows
+            int top_left_index = getLinearIndex(y - r - 1, x - r - 1, width, image.no_of_chnls);
+            int top_right_index = getLinearIndex(y - r - 1, x + r, width, image.no_of_chnls);
+            int bottom_left_index = getLinearIndex(y + r, x - r - 1, width, image.no_of_chnls);
+            int bottom_right_index = getLinearIndex(y + r, x + r, width, image.no_of_chnls);
+            int idx = getLinearIndex(y, x, width, image.no_of_chnls);
+
+            // Loop over color channels excluding alpha
+            for (int c = 0; c < num_color_channels; c++)
             {
-                for (int j = x - r; j <= x + r; j++) // loop columns
-                {
-                    int pixel_idx = ((i * width) + j) * image.no_of_chnls; // Get the index of the pixel in the 1D array (pixel of the first element(red))
-
-                    rgb_sum[0] += image.pixels[pixel_idx];
-                    rgb_sum[1] += image.pixels[pixel_idx + 1];
-                    rgb_sum[2] += image.pixels[pixel_idx + 2];
-                }
+                new_image.pixels[idx + c] = table[bottom_right_index + c] - table[bottom_left_index + c] - table[top_right_index + c] + table[top_left_index + c];
+                new_image.pixels[idx + c] /= area;
             }
-
-            for (auto &val : rgb_sum)
-                val /= area;
-            int idx = ((y * width) + x) * image.no_of_chnls; // Get the index of the pixel in the 1D array (pixel of the first element(red))
-            new_image.pixels[idx] = rgb_sum[0];
-            new_image.pixels[idx + 1] = rgb_sum[1];
-            new_image.pixels[idx + 2] = rgb_sum[2];
             blurred_pixel_count++;
         }
     }
-    int expected_image_size = (width - r * 2) * (height - r * 2);
-    std::cout << "Expected: " << expected_image_size << std::endl;
-    std::cout << "Actual: " << blurred_pixel_count << std::endl;
+    int expected_image_size = (width - (r + 1) * 2) * (height - (r + 1) * 2);
+    std::cout << "Expected Image size: " << expected_image_size << std::endl;
+    std::cout << "Actual Image size: " << blurred_pixel_count << std::endl;
     if (blurred_pixel_count != expected_image_size)
     {
         std::cout << "Error Blurring Image" << std::endl;
         return image;
     }
     return new_image;
+}
+
+int getColorChannelCount(int number_of_channels)
+{
+    // If the number of channels is even, assume the last channel is alpha
+    // (e.g., RGBA or Grayscale+Alpha), and exclude it from processing.
+    // Otherwise, process all channels (e.g., RGB or Grayscale).
+    return (number_of_channels % 2) ? number_of_channels : number_of_channels - 1;
+}
+
+std::vector<int> computeSummedAreaTable(Image image)
+{
+    int width = image.width;
+    int height = image.height;
+    int num_chnls = image.no_of_chnls;
+    std::vector<int> table(width * height * num_chnls);
+    table[0] = image.pixels[0];
+    int num_color_channels = getColorChannelCount(image.no_of_chnls);
+    // Calculate the values for the first element of each column
+    for (int x = 1; x < width; x++)
+    {
+        int linear_index = getLinearIndex(0, x, width, num_chnls);
+        int prev_lin_index = getLinearIndex(0, x - 1, width, num_chnls);
+        // Loop over color channels excluding alpha
+        for (int c = 0; c < num_color_channels; c++)
+        {
+            table[linear_index + c] = image.pixels[linear_index + c] + table[prev_lin_index + c];
+        }
+    }
+    // Calculate the values for the first element of each row
+    for (int y = 1; y < height; y++)
+    {
+        int linear_index = getLinearIndex(y, 0, width, num_chnls);
+        int prev_lin_index = getLinearIndex(y - 1, 0, width, num_chnls);
+        // Loop over color channels excluding alpha
+        for (int c = 0; c < num_color_channels; c++)
+        {
+            table[linear_index + c] = image.pixels[linear_index + c] + table[prev_lin_index + c];
+        }
+    }
+
+    // Calculate the values for the rest of the elements
+    for (int i = 1; i < height; i++)
+    { // loop rows
+        for (int j = 1; j < width; j++)
+        { // loop columns
+            int index = getLinearIndex(i, j, width, num_chnls);
+            int left_pixel_index = getLinearIndex(i - 1, j, width, num_chnls);
+            int top_pixel_index = getLinearIndex(i, j - 1, width, num_chnls);
+            int diagonal_pixel_index = getLinearIndex(i - 1, j - 1, width, num_chnls);
+
+            // Loop over color channels excluding alpha
+            for (int c = 0; c < num_color_channels; c++)
+            {
+                table[index + c] = image.pixels[index + c] + table[left_pixel_index + c] + table[top_pixel_index + c] - table[diagonal_pixel_index + c];
+            }
+        }
+    }
+    return table;
 }
