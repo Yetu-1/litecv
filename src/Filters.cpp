@@ -119,15 +119,12 @@ Image applyBoxBlur(Image image, int r)
             // Loop over color channels excluding alpha
             for (int c = 0; c < num_color_channels; c++)
             {
-                new_image.pixels[idx + c] = table[bottom_right_index + c] - table[bottom_left_index + c] - table[top_right_index + c] + table[top_left_index + c];
-                new_image.pixels[idx + c] /= area;
+                new_image.pixels[idx + c] = (table[bottom_right_index + c] - table[bottom_left_index + c] - table[top_right_index + c] + table[top_left_index + c]) / area;
             }
             blurred_pixel_count++;
         }
     }
     int expected_image_size = (width - (r + 1) * 2) * (height - (r + 1) * 2);
-    std::cout << "Expected Image size: " << expected_image_size << std::endl;
-    std::cout << "Actual Image size: " << blurred_pixel_count << std::endl;
     if (blurred_pixel_count != expected_image_size)
     {
         std::cout << "Error Blurring Image" << std::endl;
