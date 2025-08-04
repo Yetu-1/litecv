@@ -53,50 +53,6 @@ int convertToGrayscale(Image &image)
     return 0;
 }
 
-// Image applyBoxBlur(Image image, int r)
-// {
-//     int width = image.width;
-//     int height = image.height;
-//     Image new_image = image;
-//     int blurred_pixel_count = 0;
-
-//     int area = std::pow((2 * r + 1), 2);
-//     for (int y = r; y < height - r; y++)
-//     {
-//         for (int x = r; x < width - r; x++)
-//         {
-//             std::array<float, 3> rgb_sum = {0, 0, 0};
-//             for (int i = y - r; i <= y + r; i++) // loop rows
-//             {
-//                 for (int j = x - r; j <= x + r; j++) // loop columns
-//                 {
-//                     int pixel_idx = getLinearIndex(i, j, width, image.no_of_chnls); // Get the index of the pixel in the 1D array (pixel of the first element(red))
-
-//                     rgb_sum[0] += image.pixels[pixel_idx];
-//                     rgb_sum[1] += image.pixels[pixel_idx + 1];
-//                     rgb_sum[2] += image.pixels[pixel_idx + 2];
-//                 }
-//             }
-
-//             for (auto &val : rgb_sum)
-//                 val /= area;
-//             int idx = getLinearIndex(y, x, width, image.no_of_chnls); // Get the index of the pixel in the 1D array (pixel of the first element(red))
-//             new_image.pixels[idx] = rgb_sum[0];
-//             new_image.pixels[++idx] = rgb_sum[1];
-//             new_image.pixels[++idx] = rgb_sum[2];
-//             blurred_pixel_count++;
-//         }
-//     }
-
-//     int expected_image_size = (width - r * 2) * (height - r * 2);
-//     if (blurred_pixel_count != expected_image_size)
-//     {
-//         std::cout << "Error Blurring Image" << std::endl;
-//         return image;
-//     }
-//     return new_image;
-// }
-
 Image applyBoxBlur(Image image, int r)
 {
     int width = image.width;
